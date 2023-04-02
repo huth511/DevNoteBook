@@ -3,4 +3,4 @@
 # Summary
 
 - [Introduction](README.md)
-- [图计算](./图计算/图计算.md)
+- [Graph Computing](./GraphComputing/GraphComputing.md)
