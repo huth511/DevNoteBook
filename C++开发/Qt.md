@@ -80,3 +80,12 @@ QMetaObject::invokeMethod(
 ```
 
 必须是qt元系统能识别的函数，比如应该设为信号或槽，或用`Q_INVOKABLE`声明
+
+## QMake使用
+
+### 添加编译参数
+
+```makefile
+QMAKE_CXXFLAGS += -ggdb  -Wno-unused-parameter -Wunused-variable
+```
+

@@ -13,6 +13,7 @@
   ```sh
   git rm -r --cached .
   git add .
+  git commit -m "update gitignore"
   ```
 
 - 手动添加忽略路径
@@ -21,3 +22,12 @@
   # 在PATH处输入要忽略的文件
   git update-index --assume-unchanged [PATH]
   ```
+
+## 指令
+
+### 保存用户名密码
+
+```sh
+git config --global credential.helper store
+```
+

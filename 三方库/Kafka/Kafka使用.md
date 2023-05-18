@@ -4,7 +4,7 @@
 
 ```sh
 # 获取kafka某个topic的所有partition的offset
-kafka-run-class.sh kafka.tools.GetOffsetShell --bootstrap-server localhost:9092 --topic tess-trace
+kafka-run-class.sh kafka.tools.GetOffsetShell --bootstrap-server 123.60.14.186:9092 --topic tess-trace
 # 从指定offset开始消费
 kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic tess-trace --offset 105671 --partition 0
 
@@ -33,11 +33,11 @@ kafka-console-consumer.sh \
 --value-deserializer "org.apache.kafka.common.serialization.DoubleDeserializer"
 
 # 创建topic
-./kafka-topics.sh --create --topic tess-trace --replication-factor 1 --partitions 10 --bootstrap-server localhost:9092
+.\kafka-topics.sh --create --topic tess-trace --replication-factor 1 --partitions 10 --bootstrap-server localhost:9092
 # 删除topic
-./kafka-topics.sh --delete --topic tess-trace --bootstrap-server localhost:9092
+.\kafka-topics.bat --delete --topic tess-trace --bootstrap-server localhost:9092
 # 列出topic
-./kafka-topics.sh --list --topic tess-trace --bootstrap-server localhost:9092
+./kafka-topics.sh --list --bootstrap-server localhost:9092 --topic tess-trace
 ```
 
 ## 遇到的错误
@@ -69,4 +69,8 @@ kafka-console-consumer.sh \
 - 不要创建字母相同，仅大小写不同的topic
 
 ### modern-kafka的对象作为全局变量，会出错
+
 ==原因未知==
+
+wgfz-350-1682301858933
+wgfz-350-1682302409497
