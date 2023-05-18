@@ -1,5 +1,1 @@
-[toc]
-
-# DevNoteBook
-
-[图计算](./图计算/图计算.md)
+# Huth的开发笔记
