@@ -4,24 +4,24 @@
 
 ```sh
 # 获取kafka某个topic的所有partition的offset
-kafka-run-class.sh kafka.tools.GetOffsetShell --bootstrap-server 123.60.14.186:9092 --topic tess-trace
+kafka-run-class.sh kafka.tools.GetOffsetShell --bootstrap-server 10.16.21.23:9092,10.16.21.24:9092,10.16.21.25:9092 --topic HICON_VEHICLES_TRACE
 # 从指定offset开始消费
-kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic tess-trace --offset 105671 --partition 0
+./kafka-console-consumer.sh --bootstrap-server 10.16.21.23:9092,10.16.21.24:9092,10.16.21.25:9092 --topic HICON_VEHICLES_TRACE --offset 35000000 --partition 0
 
 # kafka从指定时间开始消费
 ## 指定某个group的offset到某个时间点
 kafka-consumer-groups.sh \
---bootstrap-server 127.0.0.1:9092 \
---group group_test \
---topic test_topic \
+--bootstrap-server 10.16.21.23:9092,10.16.21.24:9092,10.16.21.25:9092 \
+--group jida \
+--topic HICON_VEHICLES_TRACE \
 --reset-offsets \
---to-datetime 2022-07-02T12:00:00.000 \
+--to-datetime 2023-07-03T09:30:00.000 \
 -execute
 ## 通过该group进行消费
-kafka-console-consumer.sh \
--topic test_topic \
---bootstrap-server 127.0.0.1:9092 \
---group group_test 
+./kafka-console-consumer.sh \
+-topic HICON_VEHICLES_TRACE \
+--bootstrap-server 10.16.21.23:9092,10.16.21.24:9092,10.16.21.25:9092 \
+--group jida 
 # 打印其他属性
 --property print.offset=true \
 --property print.partition=true \
@@ -33,9 +33,12 @@ kafka-console-consumer.sh \
 --value-deserializer "org.apache.kafka.common.serialization.DoubleDeserializer"
 
 # 创建topic
-.\kafka-topics.sh --create --topic tess-trace --replication-factor 1 --partitions 10 --bootstrap-server localhost:9092
+.\kafka-topics.bat --create --topic tess-trace --replication-factor 1 --partitions 10 --bootstrap-server localhost:9092
+
+./kafka-topics.sh --create --topic tess-trace --replication-factor 1 --partitions 10 --bootstrap-server 10.16.21.23:9092,10.16.21.24:9092,10.16.21.25:9092
+
 # 删除topic
-.\kafka-topics.bat --delete --topic tess-trace --bootstrap-server localhost:9092
+.\kafka-topics.bat --delete --topic HICON_VEHICLES_TRACE --bootstrap-server localhost:9092
 # 列出topic
 ./kafka-topics.sh --list --bootstrap-server localhost:9092 --topic tess-trace
 ```
@@ -74,3 +77,7 @@ kafka-console-consumer.sh \
 
 wgfz-350-1682301858933
 wgfz-350-1682302409497
+
+### 时间戳
+
+>[Kafka消息时间戳(kafka message timestamp) - huxihx - 博客园 (cnblogs.com)](https://www.cnblogs.com/huxi2b/p/6050778.html)

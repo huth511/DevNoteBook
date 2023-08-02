@@ -81,6 +81,25 @@ QMetaObject::invokeMethod(
 
 必须是qt元系统能识别的函数，比如应该设为信号或槽，或用`Q_INVOKABLE`声明
 
+## 一些问题
+
+### Qt的
+
+#### libQt5WebEngineCore.so链接时出错
+
+> 问题描述：libQt5WebEngineCore.so: .dynsym local symbol at index 4 (>= sh_info of 3)
+
+方法有两种：
+
+- `sudo ln -sf /usr/bin/x86_64-linux-gnu-ld.gold /usr/bin/ld`
+
+- `CONFIG += use_lld_linker`
+
+  ```sh
+  sudo apt-get install lld
+  and adding 'CONFIG+=use_lld_linker' to the .pro file, is working.
+  ```
+
 ## QMake使用
 
 ### 添加编译参数
@@ -88,4 +107,10 @@ QMetaObject::invokeMethod(
 ```makefile
 QMAKE_CXXFLAGS += -ggdb  -Wno-unused-parameter -Wunused-variable
 ```
+
+## 方法
+
+### 信号槽
+
+#### 绑定重载槽函数
 

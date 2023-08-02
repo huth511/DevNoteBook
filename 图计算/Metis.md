@@ -122,6 +122,29 @@ int main() {
 }
 ```
 
+## 安装
+
+- 安装libGKlib
+
+  假设安装在`/usr/local`下
+
+- 在主目录下执行：
+
+  ```sh
+  make config shared=1 prefix=/usr/local gklib_path=/usr/local i64=1 r64=1
+  ```
+
+- 修改`/home/huth/Downloads/METIS/build/libmetis/CMakeFiles/metis.dir/link.txt`文件：
+
+  在最后加入`-lGKlib`
+
+- 回到主目录，执行：
+
+  ```sh
+  make -j4
+  make install
+  ```
+
 ---
 
 > [图划分软件Metis的使用](https://zhuanlan.zhihu.com/p/225724970)
