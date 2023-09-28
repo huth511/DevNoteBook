@@ -252,6 +252,18 @@ spec:
 
 ### 安装
 
+#### Windows安装
+
+> https://zhuanlan.zhihu.com/p/631238394
+
+使用Rancher Desktop
+
+##### Password
+
+```sh
+qQ7m8aISFxG5gy3J
+```
+
 #### ubuntu安装
 
 > https://developer.aliyun.com/article/906571
@@ -337,11 +349,11 @@ done;
 ```sh
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc7/aio/deploy/recommended.yaml
 
-docker pull registry.aliyuncs.com/google_containers/kubernetes-dashboard-amd64:v1.10.1
-docker tag registry.aliyuncs.com/google_containers/kubernetes-dashboard-amd64:v1.10.1 k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1
-docker rmi registry.aliyuncs.com/google_containers/kubernetes-dashboard-amd64:v1.10.1
+docker pull registry.aliyuncs.com/google_containers/kubernetes-dashboard-amd64:v2.7.0
+docker tag registry.aliyuncs.com/google_containers/kubernetes-dashboard-amd64:v2.7.0 k8s.gcr.io/kubernetes-dashboard-amd64:v2.7.0
+docker rmi registry.aliyuncs.com/google_containers/kubernetes-dashboard-amd64:v2.7.0
 
-kubectl create -f kubernetes-dashboard.yaml
+kubectl create -f kubernetes-dashboard.yml
 
 # 查看安装结果
 kubectl get pod --namespace=kube-system
@@ -373,10 +385,10 @@ subjects:
   namespace: kubernetes-dashboard
 
 # 安装
-kubectl apply -f dashboard-admin.yaml
+kubectl apply -f dashboard-admin.yml
 
 # 获取访问令牌
-kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get sa/admin-user -o jsonpath="{.secrets[0].name}") -o go-template="{{.data.token | base64decode}}"
+kubectl -n kubernetes-dashboard create token admin-user
 
 # 编辑dashboard deploy的yaml，延迟超时，在args下添加：
 - '--token-ttl=68400'

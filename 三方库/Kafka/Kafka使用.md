@@ -5,6 +5,8 @@
 ```sh
 # 获取kafka某个topic的所有partition的offset
 kafka-run-class.sh kafka.tools.GetOffsetShell --bootstrap-server 10.16.21.23:9092,10.16.21.24:9092,10.16.21.25:9092 --topic HICON_VEHICLES_TRACE
+
+.\kafka-run-class.bat kafka.tools.GetOffsetShell --bootstrap-server 192.168.1.182:9092 --topic tess-trace
 # 从指定offset开始消费
 ./kafka-console-consumer.sh --bootstrap-server 10.16.21.23:9092,10.16.21.24:9092,10.16.21.25:9092 --topic HICON_VEHICLES_TRACE --offset 35000000 --partition 0
 
@@ -33,12 +35,15 @@ kafka-consumer-groups.sh \
 --value-deserializer "org.apache.kafka.common.serialization.DoubleDeserializer"
 
 # 创建topic
-.\kafka-topics.bat --create --topic tess-trace --replication-factor 1 --partitions 10 --bootstrap-server localhost:9092
+.\kafka-topics.bat --create --topic tess-trace --replication-factor 1 --partitions 10 --bootstrap-server 192.168.1.49:9092
 
 ./kafka-topics.sh --create --topic tess-trace --replication-factor 1 --partitions 10 --bootstrap-server 10.16.21.23:9092,10.16.21.24:9092,10.16.21.25:9092
 
+# 消费
+.\kafka-console-consumer.bat --topic tess-trace --bootstrap-server 192.168.137.1:9092 --partition 1
+
 # 删除topic
-.\kafka-topics.bat --delete --topic HICON_VEHICLES_TRACE --bootstrap-server localhost:9092
+.\kafka-topics.bat --delete --topic tess-trace --bootstrap-server localhost:9092
 # 列出topic
 ./kafka-topics.sh --list --bootstrap-server localhost:9092 --topic tess-trace
 ```

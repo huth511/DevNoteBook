@@ -10,8 +10,8 @@
   # 查看
   wsl -l -v
   # 导出
-  wsl --export docker-desktop-data D:\docker\
-  wsl --export docker-desktop D:\docker\
+  wsl --export docker-desktop-data D:\docker\docker-desktop-data.tar
+  wsl --export docker-desktop D:\docker\docker-desktop.tar
   # 注销已有
   wsl --unregister docker-desktop-data
   wsl --unregister docker-desktop
@@ -41,6 +41,8 @@
      在`/var/lib/docker/containers`下
 
 2. 重启Docker
+
+   `systemctl restart docker`
 
 ## 跨平台构建
 
@@ -118,6 +120,16 @@ export PATH=/usr/include:/usr/bin/:/root/miniconda3/envs/py3.8/bin/:/root/minico
 export CMAKE_CXX_COMPILER=/usr/bin/g++
 ```
 
+## 搭建本地镜像库
+
+> [docker学习之搭建自己的本地镜像仓库 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/38533762)
+
+```sh
+docker run -d -p 5000:5000 -v /opt/docker/registry:/var/lib/registry --name jida-registry registry 
+```
+
+
+
 ## Compose
 
 > [Docker Compose | 菜鸟教程 (runoob.com)](https://www.runoob.com/docker/docker-compose.html)
@@ -139,13 +151,22 @@ export CMAKE_CXX_COMPILER=/usr/bin/g++
 docker swarm init --advertise-addr 192.168.1.49
 ```
 
-#### node加入
+#### 添加label
 
 ```sh
+docker node update --label-add role=manager vjri6nvl5l6rzqtx4xrzxgh15
+```
+
+#### worker node加入
+
+```sh
+# 在manager node获取token
+docker swarm join-token -q worker
+# 加入
 docker swarm join --token xxx
 ```
 
-#### manager从结点加入
+#### manager node加入
 
 ```sh
 # 获取下一步执行指令，执行该指令后，该节点将设置为manager从节点加入到这个swarm集群中
@@ -157,20 +178,34 @@ docker swarm join-token manager
 #### 创建一个私有网络
 
 ```sh
-docker network create -d overlay tess_ds_network
+docker network create -d overlay tess_ds_net
 ```
 
 #### 在指定网络中部署
 
 ```sh
-docker service create --replicas 1 --network tess_ds_network --name tess_ds_master -p 8899:7788 tessds:20230619
+docker service create --replicas 1 --network tess_ds_net --name tess_ds_master -p 8899:7788 tessds:20230619
 
-docker service create --replicas 3 --network tess_ds_network --name tess_ds_worker tessds:20230619
+docker service create --replicas 3 --network tess_ds_net --name tess_ds_worker tessds:20230619
 ```
 
 #### 使用docker-compose.yml部署
 
 ```sh
-docker stack deploy --compose-file tessds-compose.yml
+docker stack deploy --compose-file tess_ds_compose.yml
+```
+
+##### docker-compose.yml
+
+```yaml
+```
+
+### 管理
+
+#### 服务管理
+
+```sh
+# 查看
+docker service ps tess_ds_worker --no-trunc
 ```
 

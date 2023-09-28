@@ -2,7 +2,7 @@
 
 ```sh
 # core dump文件输出
-ulimit -S -c 1024
+ulimit -S -c unlimited
 echo -e "\n# enable coredump whith unlimited file-size for all users\n* soft core unlimited" >> /etc/security/limits.conf
 
 mkdir -p /tmp/coredump && chmod 777 /tmp/coredump
@@ -20,5 +20,5 @@ echo -e "1" > /proc/sys/kernel/core_uses_pid
 ## 重启
 ## 在 /proc/sys/kernel/core_pattern里添加
 kernel.core_pattern = /var/core_log/%t-%e-%p-%c.core
-kernel.core_uses_pid = 0
+kernel.core_uses_pid = 1
 ```
