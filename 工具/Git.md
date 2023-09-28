@@ -31,3 +31,16 @@
 git config --global credential.helper store
 ```
 
+### 不追踪某些文件
+
+> https://www.cnblogs.com/lovelyli/p/13359421.html
+
+```sh
+# 关闭跟踪app目录下后缀为.xml的文件
+git update-index --assume-unchanged "/app/*.xml"
+# 打开跟踪app目录下的所有文件
+git update-index --assume-unchanged "/app/"
+# git打开跟踪文件修改提交
+git update-index --no-assume-unchanged "/root/tem/java/web/application-dev.yml"
+```
+
