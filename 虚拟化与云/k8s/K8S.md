@@ -68,6 +68,31 @@ kubectl create cm tess-conf --from-file=./tess.conf
 # dns查看
 kubectl run curl --image=radial/busyboxplus:curl -i --tty
 nslookup [service name]
+
+# api
+## 授权匿名用户
+kubectl create clusterrolebinding cluster-system-anonymons --clusterrole=cluster-admin --user=system:anonymous
+## api doc
+https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/
+```
+
+### 节点维护
+
+#### 剔除node
+
+[k8s集群中节点退出、重入 - 代码先锋网 (codeleading.com)](https://www.codeleading.com/article/14765695179/)
+
+```sh
+# 不调度某节点
+kubectl cordon jida-inspur-4
+## 重新调度就uncordon
+
+# 驱逐该节点上的所有pod
+kubectl drain jida-inspur-4
+## 若有问题，强制删除某些pod
+
+# 剔除结点
+kubectl delete node jida-inspur-4
 ```
 
 ### 其它
@@ -80,6 +105,47 @@ nslookup [service name]
       exec:
         command: ["/bin/sh", "-c", "export INDEX=${HOSTNAME##*-}"]
   ```
+
+- 强制关闭pod
+
+  > [K8s无法删除状态为terminating的pod解决方法_kubernetes_风清一片-Cloudpods (csdn.net)](https://cloudpods.csdn.net/657806c4b8e5f01e1e44774f.html?dp_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MTUwOTUzNiwiZXhwIjoxNzA5NzkxMDAwLCJpYXQiOjE3MDkxODYyMDAsInVzZXJuYW1lIjoiaHV0aF9jb2RlciJ9.KJ6fXE2Jcv3-2LawEGGD1f0Mb1IVfmMLhGMqTGrv_bc)
+  
+  - 强制删除
+    `kubectl delete pod tess-ds-long-workers-sts-58 -n tess-ds-long --force --grace-period=0`
+  - 如果强制删除还不行，设置finalizers为空
+    `kubectl patch pod xxx -n xxx -p ‘{“metadata”:{“finalizers”:null}}’`
+
+- 强制关闭正在终止的namespace
+
+  > [k8s强制删除处于Terminating状态的namespace_unable to create new content in namespace rook-cep-CSDN博客](https://blog.csdn.net/xmkj9117/article/details/128785774)
+
+  - `kubectl get namespace chaosblade -o json > tmp.json`
+
+  - 删除finalizers字段
+    ```json
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "creationTimestamp": "2019-11-20T15:18:06Z",
+        "deletionTimestamp": "2020-01-16T02:50:02Z",
+        "name": "<terminating-namespace>",
+        "resourceVersion": "3249493",
+        "selfLink": "/api/v1/namespaces/knative-eventing",
+        "uid": "f300ea38-c8c2-4653-b432-b66103e412db"
+      },
+      "spec": {    #从此行开始删除
+        "finalizers": []
+      },   # 删到此行
+      "status": {
+        "phase": "Terminating"
+      }
+    }
+    ```
+
+  - 开启proxy：`kubectl proxy`
+  - 打开新的一个窗口，执行以下命令
+    `curl -k -H "Content-Type: application/json" -X PUT --data-binary @tmp.json http://127.0.0.1:8001/api/v1/namespaces/chaosblade/finalize`
 
 ## 配置文件
 
@@ -345,6 +411,8 @@ done;
 #### 安装dashboard
 
 > [Kubernetes基础概念 (yuque.com)](https://www.yuque.com/leifengyang/oncloud/ghnb83)
+>
+> [基于k8s-1.22.2的版本，安装k8s-dashboard - 简书 (jianshu.com)](https://www.jianshu.com/p/f08b95b2bfe9)
 
 ```sh
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc7/aio/deploy/recommended.yaml
@@ -406,6 +474,66 @@ kubeadm join
 
 # 单节点使用：让master也参与调度
 kubectl taint nodes --all node-role.kubernetes.io/master-
+```
+
+## 工具使用
+
+### Harbor
+
+[Kubernetes+Harbor完美适配 (zhihu.com)](https://www.zhihu.com/tardis/zm/art/146228748?source_id=1005)
+
+```sh
+# 创建secret
+kubectl create secret docker-registry registry-secret --namespace=tess --docker-server=192.168.1.118:80 --docker-username=admin --docker-password=Harbor12345
+```
+
+#### 注意
+
+- 使用HOSTNAME访问
+
+- 密钥中的HOSTNAME和harbor.yml中的要一样
+
+- HOSTNAME要添加到/etc/hosts中
+
+- 需要在/etc/docker/daemon.json中配置insecure-registries:
+  ```json
+  "insecure-registries": [
+      "https://192.168.1.118",
+      # docker默认https访问
+      "HUTH-JIDA2"
+  ]
+  ```
+
+### Kubectl debug
+
+```sh
+# copy pod副本，这个会在副本容器中启动一个和原来容器里的进程一样的进程，不适合gdb调试
+kubectl debug -it tess-ds-long-master -n tess-ds-long --image=debug_tools --image-pull-policy=Never --copy-to tess-ds-long-master-debug --same-node --share-processes
+# 临时容器调试，使用这种方式，其中的进程就是原来容器中正在运行的
+kubectl debug -it tess-ds-long-workers-sts-58 -n tess-ds-long --image=debug_tools --image-pull-policy=Never --target=tess-ds-long-worker-container
+
+# gdb调试
+gdb -p 14
+# 进入gdb后，会报错，输入命令
+set sysroot /proc/14/root
+```
+
+[进入gdb后，会报错，输入命令: set sysroot /](https://doc.nhr.fau.de/sdt/gdb/)
+
+[Kubernetes 临时容器和 kubectl debug 命令 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/635499910)
+
+- 临时容器不能被删除
+
+## 常用记录
+
+### Jida Inspur服务器
+
+#### K8S配置
+
+##### dashboard token
+
+```sh
+eyJhbGciOiJSUzI1NiIsImtpZCI6Ink3bG5ibDBQZloxbjhNdUJBVnFUa19LVHhyTV9wUTVOZ0ZFZ0NERldvRTgifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLWI0czU2Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiJhYWExODgzNS04YWNkLTRlZGYtYjMxZS1hM2I2NzUyMjJjYjMiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZXJuZXRlcy1kYXNoYm9hcmQ6YWRtaW4tdXNlciJ9.fH4RTE4WAubuqIPGTUlMuk_8Z-01DYJSgCz4OYGzi7ALoWGIDtswW4qU8DCOhrAizVbbwDs3uk2h3UuFuVVESntcfQ58y6yHOHS0zzVa0bXcvNAr0L9glpfHVsrVF-4PHN8KIHqa3hsJrNOQkCCOQ2Ay_UzKfxKGq-bOZ3F0u8x4zQN-yE-3QefJjPQRFsLJpsjb88FixfLSFyOwlr_Qvd25FJQtUa1JazzsZIx4OVhiFzWAu5ylwYQGXfi65ZbKWfk5YdX1gO7b1xAGsyzLPPGrD7c9bxR7YCJckcQiL5fUSNyn33tXSX5zpLcb3_FbvXXzSbrbMxjMDUTXeBB57Q
 ```
 
 ## 笔记

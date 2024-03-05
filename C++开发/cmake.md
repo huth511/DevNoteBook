@@ -1,3 +1,15 @@
+#### cmake基本教程
+
+[CMake 教程 | CMake 从入门到应用 - Aiden Blog (aiden-dong.github.io)](https://aiden-dong.github.io/2019/07/20/CMake教程之CMake从入门到应用/)
+
+[CMake 保姆级教程（上） | 爱编程的大丙 (subingwen.cn)](https://subingwen.cn/cmake/CMake-primer/index.html)
+
+[CMake 保姆级教程（下） | 爱编程的大丙 (subingwen.cn)](https://subingwen.cn/cmake/CMake-advanced/)
+
+[【cmake教程】find_path、find_library、find_program_find_path cmake-CSDN博客](https://blog.csdn.net/challenglistic/article/details/130169830)
+
+[【CMake】cmake的install指令_cmake --install-CSDN博客](https://blog.csdn.net/qq_38410730/article/details/102837401)
+
 #### cmake
 
 - 添加编译器选项

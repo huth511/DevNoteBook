@@ -209,3 +209,33 @@ docker stack deploy --compose-file tess_ds_compose.yml
 docker service ps tess_ds_worker --no-trunc
 ```
 
+### 一些问题
+
+#### overlay磁盘占用过高
+
+[Docker overlay2磁盘占用过高_/var/lib/docker/overlay2 磁盘爆满-CSDN博客](https://blog.csdn.net/yeqinghanwu/article/details/126122542)
+
+##### 限制日志文件大小
+
+```sh
+[root@test ~]# vi /etc/docker/daemon.json 
+{
+    "log-driver":"json-file",
+    "log-opts":{
+        "max-size" :"50m",
+        "max-file":"1"
+    }
+}
+
+# 重启docker
+systemctl daemon-reload
+systemctl restart docker
+```
+
+### 其它
+
+#### 私有仓库
+
+##### harbor
+
+[docker中安装最新版私有镜像仓库harbor(v2.8.2 ) - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/638376379)

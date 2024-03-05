@@ -100,6 +100,26 @@ QMetaObject::invokeMethod(
   and adding 'CONFIG+=use_lld_linker' to the .pro file, is working.
   ```
 
+#### QtCreator中文出错
+
+> [【QT问题解决】在QT中使用中文_qt中文字符串编译错误_Briant_ccj的博客-CSDN博客](https://blog.csdn.net/briant_ccj/article/details/124231861)
+
+- windows下是MSVC导致的
+
+  - 设置QT Creator的编辑的编码方式（解决编译出错问题）
+
+    ![img](./assets/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAQnJpYW50X2Njag==,size_18,color_FFFFFF,t_70,g_se,x_16.png)
+
+  - 在代码中增加（解决乱码问题)
+
+    ```c++
+    #if _MSC_VER >= 1600
+    #pragma execution_character_set("utf-8")
+    #endif
+    ```
+
+    这个宏告诉MSVC，执行程序中字符的编码采用UTF-8,别用本地的编码
+
 ## QMake使用
 
 ### 添加编译参数

@@ -7,8 +7,8 @@
 ```sh
 protoc --cpp_out=dllexport_decl=TESSDATA_EXPORT:./ -I D:\Tess_git\TessData\ Distributed.proto
 
-protoc --cpp_out=dllexport_decl=TESSDATA_EXPORT:./ -I F:\Tess_git\TessData\ Snapshot.proto
+protoc --cpp_out=dllexport_decl=TESSDATA_EXPORT:./ -I D:\Tess_git\TessData\ Snapshot.proto
 
-protoc --cpp_out=dllexport_decl=TESSDATA_EXPORT:./ -I F:\Tess_git\TessData\ Tess.proto
+protoc --cpp_out=dllexport_decl=TESSDATA_EXPORT:./ -I D:\Tess_git\TessData\ Tess.proto
 ```
 
