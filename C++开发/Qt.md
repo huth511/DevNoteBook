@@ -120,6 +120,10 @@ QMetaObject::invokeMethod(
 
     这个宏告诉MSVC，执行程序中字符的编码采用UTF-8,别用本地的编码
 
+#### Project ERROR: msvc-version.conf loaded but QMAKE_MSC_VER isn‘t set
+
+在`"D:\Qt\5.15.2\msvc2019_64\mkspecs\common\msvc-version.conf"`中添加`QMAKE_MSC_VER=1919`（1919代表VS版本为2019）
+
 ## QMake使用
 
 ### 添加编译参数

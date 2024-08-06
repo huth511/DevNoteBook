@@ -4,9 +4,9 @@
 
 ```sh
 # 获取kafka某个topic的所有partition的offset
-.\kafka-run-class.sh kafka.tools.GetOffsetShell --bootstrap-server 192.168.1.115:9092 --topic tess-trace-nj
+.\kafka-run-class.sh kafka.tools.GetOffsetShell --bootstrap-server 192.168.1.115:9092 --topic tess-trace-long
 
-.\kafka-run-class.bat kafka.tools.GetOffsetShell --bootstrap-server 10.184.224.6:9092 --topic tess-trace
+.\kafka-run-class.bat kafka.tools.GetOffsetShell --bootstrap-server 192.168.1.115:9092 --topic tess-trace-long
 # 从指定offset开始消费
 ./kafka-console-consumer.sh --bootstrap-server 10.16.21.23:9092,10.16.21.24:9092,10.16.21.25:9092 --topic HICON_VEHICLES_TRACE --offset 35000000 --partition 16
 
@@ -41,12 +41,12 @@ kafka-consumer-groups.sh \
 ./kafka-topics.sh --create --topic tess-trace --replication-factor 1 --partitions 11 --bootstrap-server 10.16.21.23:9092,10.16.21.24:9092,10.16.21.25:9092
 
 # 消费
-.\kafka-console-consumer.bat --topic tess-trace --bootstrap-server 192.168.1.118:9092 --partition 16
+.\kafka-console-consumer.bat --topic wgfz-295-1711704407881-parking --bootstrap-server 192.168.1.114:9092 --partition 0
 
 # 删除topic
 .\kafka-topics.bat --delete --topic tess-trace-long --bootstrap-server 192.168.1.115:9092
 # 列出topic
-./kafka-topics.sh --list --bootstrap-server localhost:9092 --topic tess-trace
+./kafka-topics.bat --list --bootstrap-server localhost:9092 --topic tess-trace-long
 ```
 
 ## 遇到的错误
@@ -87,3 +87,14 @@ wgfz-350-1682302409497
 ### 时间戳
 
 >[Kafka消息时间戳(kafka message timestamp) - huxihx - 博客园 (cnblogs.com)](https://www.cnblogs.com/huxi2b/p/6050778.html)
+
+## 三方工具
+
+### kafka-ui
+
+#### 启动
+
+```sh
+docker run -p 11080:8080 --name kafka-ui -e TZ=Asia/Shanghai -e LANG=C.UTF-8 -e DYNAMIC_CONFIG_ENABLED=true -d  192.168.1.118/library/provectuslabs/kafka-ui:latest
+```
+

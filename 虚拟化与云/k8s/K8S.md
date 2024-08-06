@@ -84,7 +84,7 @@ https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/
 
 ```sh
 # 不调度某节点
-kubectl cordon jida-inspur-4
+kubectl cordon jida-inspur-3
 ## 重新调度就uncordon
 
 # 驱逐该节点上的所有pod
@@ -106,12 +106,16 @@ kubectl delete node jida-inspur-4
         command: ["/bin/sh", "-c", "export INDEX=${HOSTNAME##*-}"]
   ```
 
+- 强制删除某命名空间下的所有pods
+
+  `kubectl delete pods -n tess-ds --all`
+
 - 强制关闭pod
 
   > [K8s无法删除状态为terminating的pod解决方法_kubernetes_风清一片-Cloudpods (csdn.net)](https://cloudpods.csdn.net/657806c4b8e5f01e1e44774f.html?dp_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MTUwOTUzNiwiZXhwIjoxNzA5NzkxMDAwLCJpYXQiOjE3MDkxODYyMDAsInVzZXJuYW1lIjoiaHV0aF9jb2RlciJ9.KJ6fXE2Jcv3-2LawEGGD1f0Mb1IVfmMLhGMqTGrv_bc)
-  
+
   - 强制删除
-    `kubectl delete pod tess-ds-long-workers-sts-58 -n tess-ds-long --force --grace-period=0`
+    `kubectl delete pod tessng31004-pod -n tess-ds --force --grace-period=0`
   - 如果强制删除还不行，设置finalizers为空
     `kubectl patch pod xxx -n xxx -p ‘{“metadata”:{“finalizers”:null}}’`
 
@@ -122,6 +126,7 @@ kubectl delete node jida-inspur-4
   - `kubectl get namespace chaosblade -o json > tmp.json`
 
   - 删除finalizers字段
+
     ```json
     {
       "apiVersion": "v1",
@@ -144,6 +149,7 @@ kubectl delete node jida-inspur-4
     ```
 
   - 开启proxy：`kubectl proxy`
+
   - 打开新的一个窗口，执行以下命令
     `curl -k -H "Content-Type: application/json" -X PUT --data-binary @tmp.json http://127.0.0.1:8001/api/v1/namespaces/chaosblade/finalize`
 
@@ -360,6 +366,31 @@ qQ7m8aISFxG5gy3J
   apt-get install -y kubelet kubeadm kubectl --allow-unauthenticated
   ```
 
+#### centos安装
+
+- 追加仓库
+
+  ```sh
+  cat > /etc/yum.repos.d/kubernetes.repo << EOF
+  [kubernetes]
+  name=Kubernetes
+  baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-aarch64
+  enabled=1
+  gpgcheck=0
+  repo_gpgcheck=0
+  gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg
+  https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+  EOF
+  ```
+
+- 安装k8s相关程序
+
+  ```sh
+  yum install -y kubelet-1.23.17 kubeadm-1.23.17 kubectl-1.23.17
+  ```
+
+  
+
 ### 搭建
 
 #### 初始化kubeadm
@@ -476,6 +507,10 @@ kubeadm join
 kubectl taint nodes --all node-role.kubernetes.io/master-
 ```
 
+### KubeKey快速搭建
+
+[使用kubekey搭建kubernetes环境 - 万雨 - 博客园 (cnblogs.com)](https://www.cnblogs.com/Mufasa/p/17718185.html)
+
 ## 工具使用
 
 ### Harbor
@@ -496,6 +531,7 @@ kubectl create secret docker-registry registry-secret --namespace=tess --docker-
 - HOSTNAME要添加到/etc/hosts中
 
 - 需要在/etc/docker/daemon.json中配置insecure-registries:
+
   ```json
   "insecure-registries": [
       "https://192.168.1.118",
@@ -510,7 +546,7 @@ kubectl create secret docker-registry registry-secret --namespace=tess --docker-
 # copy pod副本，这个会在副本容器中启动一个和原来容器里的进程一样的进程，不适合gdb调试
 kubectl debug -it tess-ds-long-master -n tess-ds-long --image=debug_tools --image-pull-policy=Never --copy-to tess-ds-long-master-debug --same-node --share-processes
 # 临时容器调试，使用这种方式，其中的进程就是原来容器中正在运行的
-kubectl debug -it tess-ds-long-workers-sts-58 -n tess-ds-long --image=debug_tools --image-pull-policy=Never --target=tess-ds-long-worker-container
+kubectl debug -it tess-ds-workers-sts-0 -n tess-ds --image=debug_tools --image-pull-policy=Never --target=tess-ds-worker-container
 
 # gdb调试
 gdb -p 14
@@ -530,11 +566,37 @@ set sysroot /proc/14/root
 
 #### K8S配置
 
+##### 查看dashboard的token
+
+- 查看`admin-user-token-*`
+  `kubectl get secrect -n kubernetes-dashboard | grep token`
+  得到：`admin-user-token-b4s56`
+- 查看token
+  `kubectl describe secret admin-user-token-b4s56 -n kubernetes-dashboard`
+
 ##### dashboard token
 
 ```sh
 eyJhbGciOiJSUzI1NiIsImtpZCI6Ink3bG5ibDBQZloxbjhNdUJBVnFUa19LVHhyTV9wUTVOZ0ZFZ0NERldvRTgifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLWI0czU2Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiJhYWExODgzNS04YWNkLTRlZGYtYjMxZS1hM2I2NzUyMjJjYjMiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZXJuZXRlcy1kYXNoYm9hcmQ6YWRtaW4tdXNlciJ9.fH4RTE4WAubuqIPGTUlMuk_8Z-01DYJSgCz4OYGzi7ALoWGIDtswW4qU8DCOhrAizVbbwDs3uk2h3UuFuVVESntcfQ58y6yHOHS0zzVa0bXcvNAr0L9glpfHVsrVF-4PHN8KIHqa3hsJrNOQkCCOQ2Ay_UzKfxKGq-bOZ3F0u8x4zQN-yE-3QefJjPQRFsLJpsjb88FixfLSFyOwlr_Qvd25FJQtUa1JazzsZIx4OVhiFzWAu5ylwYQGXfi65ZbKWfk5YdX1gO7b1xAGsyzLPPGrD7c9bxR7YCJckcQiL5fUSNyn33tXSX5zpLcb3_FbvXXzSbrbMxjMDUTXeBB57Q
 ```
+
+#### 工具
+
+- grafana
+
+  http://192.168.1.104:32300/
+
+- kibana（EFK）
+
+  http://192.168.1.104:30338/app/discover
+
+- kafka-ui
+
+  http://192.168.1.115:18080/
+
+- harbor
+
+  https://huth-jida2/harbor
 
 ## 笔记
 
@@ -591,11 +653,11 @@ kubectl run pod_name --image=xxx
 
 - 滚动更新
 
-   ```sh
-   kubectl set image deploy/my_deploy tessng=tessng:20230526 --record
-   ## 将deploy/my_deploy中的tessng镜像更新为tessng:20230526
-   ## --record 记录更新
-   ```
+  ```sh
+  kubectl set image deploy/my_deploy tessng=tessng:20230526 --record
+  ## 将deploy/my_deploy中的tessng镜像更新为tessng:20230526
+  ## --record 记录更新
+  ```
 
 - 版本回滚
 

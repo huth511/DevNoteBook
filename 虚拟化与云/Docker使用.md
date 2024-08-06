@@ -1,3 +1,20 @@
+## Memo
+
+```sh
+# HUTH-JIDA2测试jida-saas; WSL2上的host ip: 192.168.1.4
+docker run -it --rm --name test_tess -v D:/TessDS/Data/sz.tess:/root/tessng/Data/UserNets/roadnet.tess -v D:/TessPub/Log/test_tess:/root/tessng/Log -v D:/TessPub/TESSNG_Linux_PC_Pub/build/config_saas_cloud.json:/root/tessng/config.json -p 7788:7788 --privileged tessng:pc_20240612
+# jida-inspur上测试jida-saas
+docker run -it --rm --name test_tess -v /root/Develop/TessDS/Data/2864.tess:/root/tessng/Data/UserNets/roadnet.tess -v /root/tessng/Log/test_tess:/root/tessng/Log -p 7788:7788 --privileged 192.168.1.118/tessng/tessng:saas_20240704
+# 运行一个ds worker
+docker run -it --rm --privileged  -v /root/Develop/TessDS/Data/b2h_100d_200vplph_dep.tess:/tessng/Data/UserNets/roadnet.tess -v /tmp/coredump/tess_ds/:/tmp/coredump --net=host --env TESS_DS_STATUS=worker --env TESS_DS_REDIS_ADDR=tcp://192.168.1.118:6379 --env TESS_DS_FAILOVER=1 --env TESS_DS_PROJ_ID=DS_LOCAL_TEST --env TESS_DS_PLAN_ID=0 --env TESS_DS_IP=192.168.1.118 --env TESS_DS_WORKER_PORT=11101 --env TESS_DS_TEST_RECOVER_INTERVAL=200 --env TESS_DS_TEST_RECOVER_BACK_DELTA=120 --env TESS_DS_SNAPSHOT_INTERVAL=80 --env TESS_DS_MASTER_SVC_DOMAIN=192.168.1.118 --add-host tess-jida2:192.168.1.118 --name tess_ds_local_worker 192.168.1.118/tess_ds/tess_ds2:20240408_mgr_redis_donebatch_nopoll_graph
+# 运行一个ds master
+docker run -it --rm --privileged  -v /root/Develop/TessDS/Data/roadnet.tess:/tessng/Data/UserNets/roadnet.tess -v /tmp/coredump/tess_ds/:/tmp/coredump -p 7788:7788 --env TESS_DS_STATUS=master --env TESS_DS_ONLINE_PORT=7788 --env TESS_DS_REDIS_ADDR=tcp://192.168.1.118:6379 --env TESS_DS_FAILOVER=1 --env TESS_DS_PROJ_ID=DS_LOCAL_TEST --env TESS_DS_PLAN_ID=0 --env TESS_DS_IP=192.168.1.118 --env TESS_DS_MASTER_PORT=11100 --env TESS_DS_WORKER_PORT=11101 --env TESS_DS_MASTER_ASSIGN_NODE_ID=1 --env TESS_DS_MASTER_CUT_METHOD=metis --env TESS_DS_SEND_OPTION=kafka --env TESS_DS_WORKER_SEND_TRACE=1 --env TESS_DS_KAFKA_ADDR=192.168.1.115:9092 --env TESS_DS_KAFKA_TOPIC=tess-trace --env TESS_DS_TRACE_FORMAT=default --env TESS_DS_TEST_RECOVER_INTERVAL=200 --env TESS_DS_TEST_RECOVER_BACK_DELTA=120 --env TESS_DS_SNAPSHOT_INTERVAL=80 --env TESS_DS_MASTER_SVC_DOMAIN=192.168.1.118 --add-host tess-jida2:192.168.1.118 --name tess_ds_local_master 192.168.1.118/tess_ds/tess_ds2:20240407_mgr_redis_donebatch_nopoll_graph
+# HUTH-JIDA2上运行一个ds worker
+docker run -it --rm --privileged  -v d:/TessDS/Data/b2h_100d_200vplph_dep.tess:/tessng/Data/UserNets/roadnet.tess -v d:/tmp/coredump/tess_ds/:/tmp/coredump --net=host --env TESS_DS_STATUS=worker --env TESS_DS_REDIS_ADDR=tcp://192.168.1.118:6379 --env TESS_DS_FAILOVER=1 --env TESS_DS_PROJ_ID=DS_LOCAL_TEST --env TESS_DS_PLAN_ID=0 --env TESS_DS_IP=192.168.1.118 --env TESS_DS_WORKER_PORT=11101 --env TESS_DS_TEST_RECOVER_INTERVAL=200 --env TESS_DS_TEST_RECOVER_BACK_DELTA=120 --env TESS_DS_SNAPSHOT_INTERVAL=80 --env TESS_DS_MASTER_SVC_DOMAIN=192.168.1.118 --add-host tess-jida2:192.168.1.118 --name tess_ds_local_worker 192.168.1.118/tess_ds/b2h_saas:20240618
+```
+
+
+
 ## 移动Docker的数据
 
 ### Win
@@ -83,6 +100,10 @@ docker run -it \
   --name qt-build \
   --privileged \
   qt-build:5.15.2 bash
+```
+
+```bash
+docker run -itd -v /etc/localtime:/etc/localtime:ro -v /tmp/.X11-unix:/tmp/.X11-unix:rw -e DISPLAY=$DISPLAY -e GDK_SCALE -e GDK_DPI_SCALE -v $HOME/.Xauthority:/root/.Xauthority -v "/mnt/d/GraphScope/qemu-aarch64-static:/usr/bin/qemu-aarch64-static" -v "/mnt/d/Tess_git:/root/Tess_git" -v "/mnt/d/TessPub:/root/TessPub" -v "/mnt/d/arm/TessngPub_20230210:/root/TessngPub_20230210" -v "/mnt/d/arm/TessngPub_Win:/root/TessngPub_Win" -p 17788:7788 -p 17777:7777 --name tess_arm_dev --privileged tess_arm_dev_env:20240716 bash
 ```
 
 #### 本地使用
